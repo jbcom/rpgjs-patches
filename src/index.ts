@@ -4,7 +4,7 @@ import {
   patchSpriteSafeTeardownConstructor,
 } from './sprite.js';
 import type { SpriteComponentConstructor, ViewportComponentConstructor } from './types.js';
-import { patchViewportMaskConstructor } from './viewport.js';
+import { patchViewportClampConstructor, patchViewportMaskConstructor } from './viewport.js';
 
 type CanvasElementWithInstance = {
   componentInstance?: {
@@ -29,7 +29,10 @@ export function resolveRegisteredViewportClass(
     | ViewportComponentConstructor
     | undefined;
 
-  if (typeof viewportClass?.prototype?.updateMask !== 'function') {
+  if (
+    typeof viewportClass?.prototype?.updateMask !== 'function' ||
+    typeof viewportClass.prototype.updateViewportSettings !== 'function'
+  ) {
     throw new Error('CanvasEngine Viewport component class could not be resolved');
   }
 
@@ -60,7 +63,10 @@ export function installCanvasEnginePatches(
 ): void {
   const spriteClass = resolveRegisteredSpriteClass(canvasEngine);
 
-  patchViewportMaskConstructor(resolveRegisteredViewportClass(canvasEngine));
+  const viewportClass = resolveRegisteredViewportClass(canvasEngine);
+
+  patchViewportMaskConstructor(viewportClass);
+  patchViewportClampConstructor(viewportClass);
   patchSpriteHitboxAnchorConstructor(spriteClass);
   patchSpriteSafeTeardownConstructor(spriteClass);
   patchSpriteDeferredAssetCleanupConstructor(
@@ -80,5 +86,11 @@ export type {
   SpriteLifecycleInstance,
   ViewportComponentConstructor,
   ViewportLike,
+  ViewportSettings,
 } from './types.js';
-export { applyViewportMaskRect, patchViewportMaskConstructor } from './viewport.js';
+export {
+  applyViewportMaskRect,
+  normalizeViewportClamp,
+  patchViewportClampConstructor,
+  patchViewportMaskConstructor,
+} from './viewport.js';

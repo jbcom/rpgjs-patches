@@ -2,9 +2,11 @@ import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
   applyViewportMaskRect,
   installCanvasEnginePatches,
+  normalizeViewportClamp,
   patchSpriteDeferredAssetCleanupConstructor,
   patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
+  patchViewportClampConstructor,
 } from './index.js';
 import type { SpriteComponentConstructor } from './types.js';
 
@@ -101,6 +103,32 @@ describe('CanvasEngine viewport compatibility patch', () => {
     expect(rect).toHaveBeenCalledWith(0, 0, 640, 360);
     expect(fill).toHaveBeenCalledWith(0xffffff);
   });
+
+  it('normalizes boolean clamp to pixi-viewport all-direction bounds', () => {
+    expect(normalizeViewportClamp({ clamp: true, worldWidth: 1152 })).toEqual({
+      clamp: { direction: 'all' },
+      worldWidth: 1152,
+    });
+    expect(normalizeViewportClamp({ clamp: { direction: 'x' } })).toEqual({
+      clamp: { direction: 'x' },
+    });
+  });
+
+  it('normalizes CanvasEngine viewport settings before forwarding them', () => {
+    const updateViewportSettings = vi.fn();
+    class FakeViewport {
+      updateViewportSettings(props: unknown): void {
+        updateViewportSettings(props);
+      }
+    }
+    const viewportClass = FakeViewport as unknown as import('./types.js').ViewportComponentConstructor;
+
+    patchViewportClampConstructor(viewportClass);
+    const viewport = new FakeViewport();
+    viewport.updateViewportSettings({ clamp: true });
+
+    expect(updateViewportSettings).toHaveBeenCalledWith({ clamp: { direction: 'all' } });
+  });
 });
 
 describe('CanvasEngine patch installer', () => {
@@ -108,6 +136,7 @@ describe('CanvasEngine patch installer', () => {
     const spriteClass = createSpriteConstructor();
     class FakeViewport {
       updateMask(): void {}
+      updateViewportSettings(): void {}
     }
 
     installCanvasEnginePatches({

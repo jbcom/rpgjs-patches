@@ -43,9 +43,16 @@ export type ViewportLike = {
   } | null;
 };
 
+export type ViewportSettings = {
+  clamp?: unknown;
+  [key: string]: unknown;
+};
+
 export type ViewportComponentConstructor = {
   __arcadeMaskPatchInstalled?: boolean;
+  __arcadeClampPatchInstalled?: boolean;
   prototype: {
     updateMask: () => void;
+    updateViewportSettings: (props: ViewportSettings) => void;
   };
 };

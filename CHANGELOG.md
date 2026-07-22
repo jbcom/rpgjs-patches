@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.2 - 2026-07-22
+
+- Normalize CanvasEngine 2.0.1's boolean viewport clamp to pixi-viewport's
+  supported all-direction clamp options so camera centering cannot push the
+  world below the canvas.
+
 ## 0.1.1 - 2026-07-22
 
 - Accept CanvasEngine's intentionally opaque public component-factory return

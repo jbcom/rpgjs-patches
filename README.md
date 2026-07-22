@@ -8,6 +8,8 @@ reproduced in headed browser playthroughs.
 ## Included patches
 
 - Pixi 8 viewport mask drawing (`rect().fill()` instead of deprecated APIs).
+- Correct all-direction camera clamping when CanvasEngine receives
+  `clamp: true`.
 - Safe sprite hitbox anchoring after an asynchronous sprite has been destroyed.
 - Safe sprite teardown when a map changes before async `onMount()` assigns the
   tick subscription.
@@ -22,7 +24,7 @@ guard was added after Quest for the Crown reproduced CanvasEngine 2.0.1's
 Install the package beside the exact supported CanvasEngine release:
 
 ```sh
-pnpm add @arcade-cabinet/rpgjs-patches@0.1.1 canvasengine@2.0.1
+pnpm add @arcade-cabinet/rpgjs-patches@0.1.2 canvasengine@2.0.1
 ```
 
 Install the patches before CanvasEngine bootstraps a scene:
