@@ -22,7 +22,7 @@ guard was added after Quest for the Crown reproduced CanvasEngine 2.0.1's
 Install the package beside the exact supported CanvasEngine release:
 
 ```sh
-pnpm add @arcade-cabinet/rpgjs-patches@0.1.0 canvasengine@2.0.1
+pnpm add @arcade-cabinet/rpgjs-patches@0.1.1 canvasengine@2.0.1
 ```
 
 Install the patches before CanvasEngine bootstraps a scene:

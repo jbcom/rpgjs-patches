@@ -13,8 +13,8 @@ type CanvasElementWithInstance = {
 };
 
 export type CanvasEnginePatchHost = {
-  Sprite: (props: never) => CanvasElementWithInstance;
-  Viewport: (props: never) => CanvasElementWithInstance;
+  Sprite: (props: never) => unknown;
+  Viewport: (props: never) => unknown;
 };
 
 export type InstallCanvasEnginePatchesOptions = {
@@ -24,7 +24,7 @@ export type InstallCanvasEnginePatchesOptions = {
 export function resolveRegisteredViewportClass(
   canvasEngine: CanvasEnginePatchHost,
 ): ViewportComponentConstructor {
-  const probe = canvasEngine.Viewport({} as never);
+  const probe = canvasEngine.Viewport({} as never) as CanvasElementWithInstance;
   const viewportClass = probe.componentInstance?.constructor as
     | ViewportComponentConstructor
     | undefined;
@@ -39,7 +39,7 @@ export function resolveRegisteredViewportClass(
 export function resolveRegisteredSpriteClass(
   canvasEngine: CanvasEnginePatchHost,
 ): SpriteComponentConstructor {
-  const probe = canvasEngine.Sprite({} as never);
+  const probe = canvasEngine.Sprite({} as never) as CanvasElementWithInstance;
   const spriteClass = probe.componentInstance?.constructor as
     | SpriteComponentConstructor
     | undefined;

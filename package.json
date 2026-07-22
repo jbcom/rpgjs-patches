@@ -1,6 +1,6 @@
 {
   "name": "@arcade-cabinet/rpgjs-patches",
-  "version": "0.1.0",
+  "version": "0.1.1",
   "description": "Reusable CanvasEngine compatibility patches for standalone RPGJS games.",
   "type": "module",
   "license": "UNLICENSED",
