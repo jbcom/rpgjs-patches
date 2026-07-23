@@ -1,8 +1,13 @@
 import type {
   ViewportComponentConstructor,
+  ViewportLifecycleInstance,
   ViewportLike,
   ViewportSettings,
 } from './types.js';
+
+const EMPTY_SUBSCRIPTION = Object.freeze({
+  unsubscribe: () => undefined,
+});
 
 export function normalizeViewportClamp(props: ViewportSettings): ViewportSettings {
   const clamp = props.clamp as { value?: unknown } | undefined;
@@ -47,4 +52,22 @@ export function patchViewportClampConstructor(viewportClass: ViewportComponentCo
   };
 
   viewportClass.__arcadeClampPatchInstalled = true;
+}
+
+/** Guards a viewport retired before its asynchronous mount assigns the ticker subscription. */
+export function patchViewportSafeTeardownConstructor(
+  viewportClass: ViewportComponentConstructor,
+): void {
+  if (viewportClass.__arcadeSafeTeardownPatchInstalled) return;
+
+  const onDestroy = viewportClass.prototype.onDestroy;
+  viewportClass.prototype.onDestroy = function patchedSafeViewportOnDestroy(
+    this: ViewportLifecycleInstance,
+    parent: unknown,
+    afterDestroy: () => void,
+  ): Promise<void> {
+    this.tickSubscription ??= EMPTY_SUBSCRIPTION;
+    return onDestroy.call(this, parent, afterDestroy);
+  };
+  viewportClass.__arcadeSafeTeardownPatchInstalled = true;
 }

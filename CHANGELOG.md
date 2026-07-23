@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.1.4
+
+- Guard CanvasEngine viewport teardown when a revisioned map is retired before
+  its asynchronous mount assigns the ticker subscription.
+- Align package and CI tooling to pnpm 11.16.0 on Node 24 LTS.
+
 ## 0.1.3
 
 - Ignore late CanvasEngine spritesheet animation callbacks after Pixi has
