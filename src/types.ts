@@ -52,6 +52,10 @@ export type ViewportLike = {
   } | null;
 };
 
+export type ViewportLifecycleInstance = ViewportLike & {
+  tickSubscription?: SubscriptionLike;
+};
+
 export type ViewportSettings = {
   clamp?: unknown;
   [key: string]: unknown;
@@ -60,8 +64,10 @@ export type ViewportSettings = {
 export type ViewportComponentConstructor = {
   __arcadeMaskPatchInstalled?: boolean;
   __arcadeClampPatchInstalled?: boolean;
+  __arcadeSafeTeardownPatchInstalled?: boolean;
   prototype: {
     updateMask: () => void;
     updateViewportSettings: (props: ViewportSettings) => void;
+    onDestroy: (parent: unknown, afterDestroy: () => void) => Promise<void>;
   };
 };

@@ -8,6 +8,7 @@ import {
   patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
   patchViewportClampConstructor,
+  patchViewportSafeTeardownConstructor,
 } from './index.js';
 import type { SpriteComponentConstructor } from './types.js';
 
@@ -160,6 +161,25 @@ describe('CanvasEngine viewport compatibility patch', () => {
 
     expect(updateViewportSettings).toHaveBeenCalledWith({ clamp: { direction: 'all' } });
   });
+
+  it('makes teardown safe when async mount never assigned tickSubscription', async () => {
+    class FakeViewport {
+      tickSubscription?: { unsubscribe: () => void };
+      updateMask(): void {}
+      updateViewportSettings(): void {}
+      async onDestroy(_parent: unknown, afterDestroy: () => void): Promise<void> {
+        this.tickSubscription!.unsubscribe();
+        afterDestroy();
+      }
+    }
+    const viewportClass = FakeViewport as unknown as import('./types.js').ViewportComponentConstructor;
+    patchViewportSafeTeardownConstructor(viewportClass);
+    const viewport = new FakeViewport();
+    const afterDestroy = vi.fn();
+
+    await expect(viewport.onDestroy(null, afterDestroy)).resolves.toBeUndefined();
+    expect(afterDestroy).toHaveBeenCalledOnce();
+  });
 });
 
 describe('CanvasEngine patch installer', () => {
@@ -168,6 +188,9 @@ describe('CanvasEngine patch installer', () => {
     class FakeViewport {
       updateMask(): void {}
       updateViewportSettings(): void {}
+      async onDestroy(_parent: unknown, afterDestroy: () => void): Promise<void> {
+        afterDestroy();
+      }
     }
 
     installCanvasEnginePatches({
@@ -180,5 +203,9 @@ describe('CanvasEngine patch installer', () => {
     })();
 
     await expect(sprite.onDestroy(null, () => undefined)).resolves.toBeUndefined();
+    const viewport = new FakeViewport() as FakeViewport & {
+      tickSubscription?: { unsubscribe: () => void };
+    };
+    await expect(viewport.onDestroy(null, () => undefined)).resolves.toBeUndefined();
   });
 });

@@ -10,21 +10,23 @@ reproduced in headed browser playthroughs.
 - Pixi 8 viewport mask drawing (`rect().fill()` instead of deprecated APIs).
 - Correct all-direction camera clamping when CanvasEngine receives
   `clamp: true`.
+- Safe viewport teardown when a revisioned map retires before async `onMount()`
+  assigns the ticker subscription.
 - Safe sprite hitbox anchoring after an asynchronous sprite has been destroyed.
 - Safe sprite teardown when a map changes before async `onMount()` assigns the
   tick subscription.
 - Deferred tracked-asset removal so late Pixi texture callbacks can settle.
 
-The first three patterns were proven in `rivers-reckoning`; the safe teardown
-guard was added after Quest for the Crown reproduced CanvasEngine 2.0.1's
-`subscriptionTick.unsubscribe()` failure during rapid authored map travel.
+The first three patterns were proven in `rivers-reckoning`; the safe sprite and
+viewport teardown guards were added after Quest for the Crown reproduced
+CanvasEngine 2.0.1 subscription failures during rapid authored map replacement.
 
 ## Usage
 
 Install the package beside the exact supported CanvasEngine release:
 
 ```sh
-pnpm add @arcade-cabinet/rpgjs-patches@0.1.2 canvasengine@2.0.1
+pnpm add @arcade-cabinet/rpgjs-patches@0.1.4 canvasengine@2.0.1
 ```
 
 Install the patches before CanvasEngine bootstraps a scene:
