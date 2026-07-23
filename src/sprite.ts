@@ -1,4 +1,5 @@
 import type {
+  SpriteAnimationLifecycleInstance,
   SpriteComponentConstructor,
   SpriteInstanceWithAnchor,
   SpriteLifecycleInstance,
@@ -8,6 +9,46 @@ import type {
 const NOOP_SUBSCRIPTION: SubscriptionLike = {
   unsubscribe: () => undefined,
 };
+
+const hasLiveTransforms = (sprite: SpriteAnimationLifecycleInstance): boolean =>
+  !sprite.destroyed &&
+  typeof sprite.anchor?.set === 'function' &&
+  typeof sprite.scale?.set === 'function' &&
+  typeof sprite.skew?.set === 'function' &&
+  typeof sprite.pivot?.set === 'function';
+
+/**
+ * CanvasEngine can finish an async spritesheet mount after Pixi has destroyed
+ * the retiring Sprite. Its play() path immediately calls update(), which then
+ * writes animation transforms through Pixi points that teardown set to null.
+ */
+export function patchSpriteAnimationLifecycleConstructor(
+  spriteClass: SpriteComponentConstructor,
+): void {
+  if (spriteClass.__arcadeAnimationLifecyclePatchInstalled) return;
+
+  const play = spriteClass.prototype.play;
+  const update = spriteClass.prototype.update;
+
+  spriteClass.prototype.play = function patchedLifecycleSafePlay(
+    this: SpriteAnimationLifecycleInstance,
+    animation: string,
+    params: unknown[] = [],
+  ): void {
+    if (!hasLiveTransforms(this)) return;
+    return play.call(this, animation, params);
+  };
+
+  spriteClass.prototype.update = function patchedLifecycleSafeUpdate(
+    this: SpriteAnimationLifecycleInstance,
+    tick: { deltaRatio?: number },
+  ): void {
+    if (!hasLiveTransforms(this)) return;
+    return update.call(this, tick);
+  };
+
+  spriteClass.__arcadeAnimationLifecyclePatchInstalled = true;
+}
 
 export function patchSpriteHitboxAnchorConstructor(spriteClass: SpriteComponentConstructor): void {
   if (spriteClass.__arcadeHitboxAnchorPatchInstalled) return;

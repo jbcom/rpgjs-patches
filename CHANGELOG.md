@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.1.3
+
+- Ignore late CanvasEngine spritesheet animation callbacks after Pixi has
+  cleared the retiring sprite's transform points during a fast map swap.
+
 ## 0.1.2 - 2026-07-22
 
 - Normalize CanvasEngine 2.0.1's boolean viewport clamp to pixi-viewport's

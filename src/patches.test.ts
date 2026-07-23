@@ -3,6 +3,7 @@ import {
   applyViewportMaskRect,
   installCanvasEnginePatches,
   normalizeViewportClamp,
+  patchSpriteAnimationLifecycleConstructor,
   patchSpriteDeferredAssetCleanupConstructor,
   patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
@@ -17,9 +18,21 @@ function createSpriteConstructor(): SpriteComponentConstructor {
     globalLoader?: { removeAsset?: (assetId: string) => void } | null;
     trackedAssetIds = new Set<string>();
     subscriptionTick?: { unsubscribe: () => void };
+    scale?: { set?: (...args: number[]) => void } | null = { set: () => undefined };
+    skew?: { set?: (...args: number[]) => void } | null = { set: () => undefined };
+    pivot?: { set?: (...args: number[]) => void } | null = { set: () => undefined };
 
     applyHitboxAnchor(): void {
       this.anchor?.set?.(0.5, 0.5);
+    }
+
+    play(): void {
+      this.update({ deltaRatio: 1 });
+    }
+
+    update(): void {
+      this.anchor!.set!(0.5, 0.5);
+      this.scale!.set!(1, 1);
     }
 
     async onDestroy(_parent: unknown, afterDestroy: () => void): Promise<void> {
@@ -38,6 +51,24 @@ afterEach(() => {
 });
 
 describe('CanvasEngine sprite compatibility patches', () => {
+  it('ignores late animation work after Pixi clears sprite transforms', () => {
+    const spriteClass = createSpriteConstructor();
+    patchSpriteAnimationLifecycleConstructor(spriteClass);
+    const sprite = new (spriteClass as unknown as new () => {
+      anchor: { set: (...args: number[]) => void } | null;
+      scale: { set: (...args: number[]) => void } | null;
+      play: (animation: string) => void;
+      update: (tick: { deltaRatio?: number }) => void;
+    })();
+    const set = vi.fn();
+    sprite.anchor = { set };
+    sprite.scale = null;
+
+    expect(() => sprite.play('stand')).not.toThrow();
+    expect(() => sprite.update({ deltaRatio: 1 })).not.toThrow();
+    expect(set).not.toHaveBeenCalled();
+  });
+
   it('makes teardown safe when async mount never assigned subscriptionTick', async () => {
     const spriteClass = createSpriteConstructor();
     patchSpriteSafeTeardownConstructor(spriteClass);

@@ -13,6 +13,12 @@ export type SpriteInstanceWithAnchor = {
   } | null;
 };
 
+export type SpriteAnimationLifecycleInstance = SpriteInstanceWithAnchor & {
+  scale?: { set?: (...args: number[]) => void } | null;
+  skew?: { set?: (...args: number[]) => void } | null;
+  pivot?: { set?: (...args: number[]) => void } | null;
+};
+
 export type SpriteLifecycleInstance = SpriteInstanceWithAnchor & {
   globalLoader?: GlobalAssetLoaderLike | null;
   trackedAssetIds?: Set<string>;
@@ -23,9 +29,12 @@ export type SpriteComponentConstructor = {
   __arcadeHitboxAnchorPatchInstalled?: boolean;
   __arcadeSafeTeardownPatchInstalled?: boolean;
   __arcadeDeferredAssetCleanupPatchInstalled?: boolean;
+  __arcadeAnimationLifecyclePatchInstalled?: boolean;
   prototype: {
     applyHitboxAnchor: (width: number, height: number, realSize?: unknown) => void;
     onDestroy: (parent: unknown, afterDestroy: () => void) => Promise<void>;
+    play: (animation: string, params?: unknown[]) => void;
+    update: (tick: { deltaRatio?: number }) => void;
   };
 };
 
