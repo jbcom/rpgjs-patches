@@ -1,4 +1,5 @@
 import {
+  patchSpriteAnimationLifecycleConstructor,
   patchSpriteDeferredAssetCleanupConstructor,
   patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
@@ -68,6 +69,7 @@ export function installCanvasEnginePatches(
   patchViewportMaskConstructor(viewportClass);
   patchViewportClampConstructor(viewportClass);
   patchSpriteHitboxAnchorConstructor(spriteClass);
+  patchSpriteAnimationLifecycleConstructor(spriteClass);
   patchSpriteSafeTeardownConstructor(spriteClass);
   patchSpriteDeferredAssetCleanupConstructor(
     spriteClass,
@@ -76,11 +78,13 @@ export function installCanvasEnginePatches(
 }
 
 export {
+  patchSpriteAnimationLifecycleConstructor,
   patchSpriteDeferredAssetCleanupConstructor,
   patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
 } from './sprite.js';
 export type {
+  SpriteAnimationLifecycleInstance,
   SpriteComponentConstructor,
   SpriteInstanceWithAnchor,
   SpriteLifecycleInstance,
