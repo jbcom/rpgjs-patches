@@ -1,6 +1,6 @@
 {
   "name": "@arcade-cabinet/rpgjs-patches",
-  "version": "0.1.4",
+  "version": "0.2.0",
   "description": "Reusable CanvasEngine compatibility patches for standalone RPGJS games.",
   "type": "module",
   "license": "UNLICENSED",
@@ -45,11 +45,11 @@
     "verify": "pnpm run typecheck && pnpm run test && pnpm run build && node scripts/smoke-package.mjs"
   },
   "peerDependencies": {
-    "canvasengine": "2.0.1"
+    "canvasengine": "2.1.1"
   },
   "devDependencies": {
     "@types/node": "24.13.3",
-    "canvasengine": "2.0.1",
+    "canvasengine": "2.1.1",
     "esbuild": "0.28.1",
     "pixi.js": "8.19.0",
     "typescript": "7.0.2",

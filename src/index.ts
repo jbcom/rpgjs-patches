@@ -1,13 +1,11 @@
 import {
   patchSpriteAnimationLifecycleConstructor,
   patchSpriteDeferredAssetCleanupConstructor,
-  patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
 } from './sprite.js';
 import type { SpriteComponentConstructor, ViewportComponentConstructor } from './types.js';
 import {
   patchViewportClampConstructor,
-  patchViewportMaskConstructor,
   patchViewportSafeTeardownConstructor,
 } from './viewport.js';
 
@@ -35,8 +33,7 @@ export function resolveRegisteredViewportClass(
     | undefined;
 
   if (
-    typeof viewportClass?.prototype?.updateMask !== 'function' ||
-    typeof viewportClass.prototype.updateViewportSettings !== 'function' ||
+    typeof viewportClass?.prototype?.updateViewportSettings !== 'function' ||
     typeof viewportClass.prototype.onDestroy !== 'function'
   ) {
     throw new Error('CanvasEngine Viewport component class could not be resolved');
@@ -54,8 +51,9 @@ export function resolveRegisteredSpriteClass(
     | undefined;
 
   if (
-    typeof spriteClass?.prototype?.applyHitboxAnchor !== 'function' ||
-    typeof spriteClass.prototype.onDestroy !== 'function'
+    typeof spriteClass?.prototype?.onDestroy !== 'function' ||
+    typeof spriteClass.prototype.play !== 'function' ||
+    typeof spriteClass.prototype.update !== 'function'
   ) {
     throw new Error('CanvasEngine Sprite component class could not be resolved');
   }
@@ -71,10 +69,8 @@ export function installCanvasEnginePatches(
 
   const viewportClass = resolveRegisteredViewportClass(canvasEngine);
 
-  patchViewportMaskConstructor(viewportClass);
   patchViewportClampConstructor(viewportClass);
   patchViewportSafeTeardownConstructor(viewportClass);
-  patchSpriteHitboxAnchorConstructor(spriteClass);
   patchSpriteAnimationLifecycleConstructor(spriteClass);
   patchSpriteSafeTeardownConstructor(spriteClass);
   patchSpriteDeferredAssetCleanupConstructor(
@@ -86,23 +82,18 @@ export function installCanvasEnginePatches(
 export {
   patchSpriteAnimationLifecycleConstructor,
   patchSpriteDeferredAssetCleanupConstructor,
-  patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
 } from './sprite.js';
 export type {
   SpriteAnimationLifecycleInstance,
   SpriteComponentConstructor,
-  SpriteInstanceWithAnchor,
   SpriteLifecycleInstance,
   ViewportComponentConstructor,
   ViewportLifecycleInstance,
-  ViewportLike,
   ViewportSettings,
 } from './types.js';
 export {
-  applyViewportMaskRect,
   normalizeViewportClamp,
   patchViewportClampConstructor,
-  patchViewportMaskConstructor,
   patchViewportSafeTeardownConstructor,
 } from './viewport.js';

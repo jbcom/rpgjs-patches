@@ -7,26 +7,44 @@ reproduced in headed browser playthroughs.
 
 ## Included patches
 
-- Pixi 8 viewport mask drawing (`rect().fill()` instead of deprecated APIs).
 - Correct all-direction camera clamping when CanvasEngine receives
   `clamp: true`.
 - Safe viewport teardown when a revisioned map retires before async `onMount()`
   assigns the ticker subscription.
-- Safe sprite hitbox anchoring after an asynchronous sprite has been destroyed.
 - Safe sprite teardown when a map changes before async `onMount()` assigns the
   tick subscription.
+- Safe late animation work when an asynchronous spritesheet finishes after
+  Pixi has destroyed the retiring sprite.
 - Deferred tracked-asset removal so late Pixi texture callbacks can settle.
 
-The first three patterns were proven in `rivers-reckoning`; the safe sprite and
-viewport teardown guards were added after Quest for the Crown reproduced
-CanvasEngine 2.0.1 subscription failures during rapid authored map replacement.
+The camera and asset-lifecycle patterns were proven in `rivers-reckoning`; the
+sprite and viewport lifecycle guards were added after Quest for the Crown
+reproduced subscription and late-animation failures during rapid authored map
+replacement.
+
+CanvasEngine 2.1.1 now implements the correct Pixi 8 viewport-mask API itself
+and safely skips its own hitbox-anchor work after Pixi destroys a sprite. The
+0.2 line removes those two obsolete patches instead of continuing to override
+fixed upstream behavior.
+
+## CanvasEngine 2.1.1 audit
+
+| Behavior | 2.1.1 evidence | Decision |
+| --- | --- | --- |
+| Viewport mask | `CanvasViewport.updateMask()` calls Pixi 8 `clear().rect().fill()` and the packed probe observes that call chain. | Remove patch. |
+| Destroyed hitbox anchor | `CanvasSprite.applyHitboxAnchor()` returns when Pixi has cleared `anchor`; the packed probe destroys a real sprite and calls it safely. | Remove patch. |
+| Boolean viewport clamp | `updateViewportSettings()` still forwards `true` to `pixi-viewport`, whose all-edge form is `{ direction: 'all' }`. | Retain. |
+| Viewport pre-mount teardown | `onDestroy()` still unconditionally calls `tickSubscription.unsubscribe()`. | Retain. |
+| Sprite pre-mount teardown | `onDestroy()` still unconditionally calls `subscriptionTick.unsubscribe()`. | Retain. |
+| Late spritesheet animation | `play()` and `update()` can still write through Pixi transform points after destruction. | Retain. |
+| Tracked asset cleanup | `onDestroy()` still removes tracked assets immediately while async Pixi loading can remain in flight. | Retain. |
 
 ## Usage
 
 Install the package beside the exact supported CanvasEngine release:
 
 ```sh
-pnpm add @arcade-cabinet/rpgjs-patches@0.1.4 canvasengine@2.0.1
+pnpm add @arcade-cabinet/rpgjs-patches@0.2.0 canvasengine@2.1.1
 ```
 
 Install the patches before CanvasEngine bootstraps a scene:
@@ -46,10 +64,12 @@ Node-based package tooling.
 
 ## Support boundary
 
-This release supports `canvasengine@2.0.1`, currently the latest underlying
-runtime. A private package is not feature-complete while its direct underlying
-runtime is behind latest. Re-test and release this package before widening the
-peer range or aligning to a newer CanvasEngine.
+This release supports exactly `canvasengine@2.1.1`. The 0.2 version boundary is
+intentional: it removes obsolete public patch functions and does not claim
+compatibility with the older 2.0 runtime. A private package is not
+feature-complete while its direct underlying runtime is behind latest. Audit
+the published upstream source and behavior again before widening the peer range
+or aligning to a newer CanvasEngine.
 
 ## Verification
 
@@ -61,4 +81,7 @@ pnpm verify
 ```
 
 `pnpm verify` runs strict type checking, focused lifecycle tests, ESM and CJS
-builds, and package-entry smoke checks.
+builds, then packs the artifact into a fresh temporary consumer beside the
+exact CanvasEngine peer. That consumer proves the two upstream fixes, reproduces
+the five defects that remain before patch installation, and proves the packed
+ESM patch entry repairs the real deduplicated CanvasEngine constructors.

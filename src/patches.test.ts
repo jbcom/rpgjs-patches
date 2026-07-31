@@ -1,11 +1,9 @@
 import { afterEach, describe, expect, it, vi } from 'vitest';
 import {
-  applyViewportMaskRect,
   installCanvasEnginePatches,
   normalizeViewportClamp,
   patchSpriteAnimationLifecycleConstructor,
   patchSpriteDeferredAssetCleanupConstructor,
-  patchSpriteHitboxAnchorConstructor,
   patchSpriteSafeTeardownConstructor,
   patchViewportClampConstructor,
   patchViewportSafeTeardownConstructor,
@@ -22,10 +20,6 @@ function createSpriteConstructor(): SpriteComponentConstructor {
     scale?: { set?: (...args: number[]) => void } | null = { set: () => undefined };
     skew?: { set?: (...args: number[]) => void } | null = { set: () => undefined };
     pivot?: { set?: (...args: number[]) => void } | null = { set: () => undefined };
-
-    applyHitboxAnchor(): void {
-      this.anchor?.set?.(0.5, 0.5);
-    }
 
     play(): void {
       this.update({ deltaRatio: 1 });
@@ -103,39 +97,9 @@ describe('CanvasEngine sprite compatibility patches', () => {
     expect(removeAsset).toHaveBeenCalledWith('hero-sheet');
   });
 
-  it('skips hitbox anchoring after Pixi has destroyed the sprite', () => {
-    const spriteClass = createSpriteConstructor();
-    patchSpriteHitboxAnchorConstructor(spriteClass);
-    const sprite = new (spriteClass as unknown as new () => {
-      destroyed: boolean;
-      anchor: { set: (...args: number[]) => void };
-      applyHitboxAnchor: (width: number, height: number) => void;
-    })();
-    const set = vi.fn();
-    sprite.anchor = { set };
-    sprite.destroyed = true;
-
-    sprite.applyHitboxAnchor(32, 32);
-    expect(set).not.toHaveBeenCalled();
-  });
 });
 
 describe('CanvasEngine viewport compatibility patch', () => {
-  it('uses the Pixi 8 rect and fill drawing API', () => {
-    const clear = vi.fn();
-    const rect = vi.fn();
-    const fill = vi.fn();
-
-    applyViewportMaskRect({
-      mask: { clear, rect, fill },
-      viewport: { screenWidth: 640, screenHeight: 360 },
-    });
-
-    expect(clear).toHaveBeenCalledOnce();
-    expect(rect).toHaveBeenCalledWith(0, 0, 640, 360);
-    expect(fill).toHaveBeenCalledWith(0xffffff);
-  });
-
   it('normalizes boolean clamp to pixi-viewport all-direction bounds', () => {
     expect(normalizeViewportClamp({ clamp: true, worldWidth: 1152 })).toEqual({
       clamp: { direction: 'all' },

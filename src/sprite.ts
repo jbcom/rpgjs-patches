@@ -1,7 +1,6 @@
 import type {
   SpriteAnimationLifecycleInstance,
   SpriteComponentConstructor,
-  SpriteInstanceWithAnchor,
   SpriteLifecycleInstance,
   SubscriptionLike,
 } from './types.js';
@@ -50,26 +49,8 @@ export function patchSpriteAnimationLifecycleConstructor(
   spriteClass.__arcadeAnimationLifecyclePatchInstalled = true;
 }
 
-export function patchSpriteHitboxAnchorConstructor(spriteClass: SpriteComponentConstructor): void {
-  if (spriteClass.__arcadeHitboxAnchorPatchInstalled) return;
-
-  const applyHitboxAnchor = spriteClass.prototype.applyHitboxAnchor;
-
-  spriteClass.prototype.applyHitboxAnchor = function patchedApplyHitboxAnchor(
-    this: SpriteInstanceWithAnchor,
-    width: number,
-    height: number,
-    realSize?: unknown,
-  ): void {
-    if (this.destroyed || !this.anchor?.set) return;
-    return applyHitboxAnchor.call(this, width, height, realSize);
-  };
-
-  spriteClass.__arcadeHitboxAnchorPatchInstalled = true;
-}
-
 /**
- * CanvasEngine 2.0.1 assigns subscriptionTick inside async onMount(), but a
+ * CanvasEngine 2.1.1 assigns subscriptionTick inside async onMount(), but a
  * fast map replacement can destroy a Sprite before onMount reaches that line.
  * Its onDestroy() then unconditionally calls subscriptionTick.unsubscribe().
  */
