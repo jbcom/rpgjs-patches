@@ -1,5 +1,16 @@
 # Changelog
 
+## 0.2.0
+
+- Align the exact peer and development runtime to `canvasengine@2.1.1` under
+  Node 24 LTS.
+- Remove the viewport-mask and destroyed-sprite hitbox patches because
+  CanvasEngine 2.1.1 now provides both behaviors upstream.
+- Retain the still-reproducible boolean-clamp, pre-mount sprite and viewport
+  teardown, late-animation, and deferred asset-cleanup patches.
+- Replace local distribution imports with a freshly packed, isolated consumer
+  proof against the real CanvasEngine 2.1.1 component constructors.
+
 ## 0.1.4
 
 - Guard CanvasEngine viewport teardown when a revisioned map is retired before
