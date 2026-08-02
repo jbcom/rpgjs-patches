@@ -5,6 +5,13 @@ on:
     branches: [main]
   pull_request:
 
+
+# Supersede an in-flight run when a newer commit lands on the same ref. Without
+# this, superseded SHAs stay queued and hold slots on the shared runner.
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   verify:
     runs-on: ubuntu-latest
