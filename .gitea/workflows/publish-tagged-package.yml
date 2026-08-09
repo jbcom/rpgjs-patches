@@ -77,7 +77,7 @@ jobs:
           } >> "${GITHUB_STEP_SUMMARY}"
 
       - name: Install exact dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install --frozen-lockfile --store-dir "${RUNNER_TEMP}/pnpm-store"
 
       - name: Verify source, behavior, builds, and package entry points
         run: pnpm verify
@@ -99,8 +99,11 @@ jobs:
           test "${actual_sha256}" = "${EXPECTED_SHA256}"
           test "${actual_tar_sha256}" = "${EXPECTED_TAR_SHA256}"
           archive_version="$(tar -xOf "${tarball}" package/package.json | node -e "let data=''; process.stdin.on('data', chunk => data += chunk); process.stdin.on('end', () => process.stdout.write(JSON.parse(data).version))")"
+          post_pack_porcelain="$(git status --porcelain --untracked-files=all)"
+          printf 'archive_version=%s\nrelease_tag=%s\npost_pack_porcelain=%s\n' \
+            "${archive_version}" "${RELEASE_TAG}" "${post_pack_porcelain:-<clean>}"
           test "v${archive_version}" = "${RELEASE_TAG}"
-          test -z "$(git status --porcelain --untracked-files=all)"
+          test -z "${post_pack_porcelain}"
           echo "tarball=${tarball}" >> "${GITHUB_OUTPUT}"
           echo "sha256=${actual_sha256}" >> "${GITHUB_OUTPUT}"
           echo "artifact_sha256=${actual_sha256}" >> "${GITHUB_STEP_SUMMARY}"
