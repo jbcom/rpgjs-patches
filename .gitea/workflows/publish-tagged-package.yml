@@ -26,7 +26,6 @@ concurrency:
 
 permissions:
   contents: read
-  packages: write
 
 jobs:
   publish:
@@ -37,6 +36,7 @@ jobs:
       EXPECTED_COMMIT: ${{ inputs.expected_commit }}
       EXPECTED_SHA256: ${{ inputs.expected_sha256 }}
       EXPECTED_TAR_SHA256: ${{ inputs.expected_tar_sha256 }}
+      GITEA_API_URL: https://github.com/api/v1
       REGISTRY_URL: https://registry.npmjs.org/
     steps:
       - uses: actions/checkout@v7
@@ -109,11 +109,18 @@ jobs:
           echo "artifact_sha256=${actual_sha256}" >> "${GITHUB_STEP_SUMMARY}"
           echo "artifact_tar_sha256=${actual_tar_sha256}" >> "${GITHUB_STEP_SUMMARY}"
 
-      - name: Authenticate only the publish client
+      - name: Prove and configure the package-only publish credential
         env:
-          GITEA_TOKEN: ${{ secrets.GITEA_TOKEN }}
+          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
         run: |
-          pnpm config set "//github.com/api/packages/arcade-cabinet/npm/:_authToken" "${GITEA_TOKEN}"
+          set -euo pipefail
+          test -n "${NPM_TOKEN}"
+          curl --fail --silent --show-error --location \
+            --connect-timeout 30 --max-time 120 \
+            --header "Authorization: token ${NPM_TOKEN}" \
+            "${GITEA_API_URL}/packages/arcade-cabinet?type=npm&limit=1" \
+            --output /dev/null
+          pnpm config set "//github.com/api/packages/arcade-cabinet/npm/:_authToken" "${NPM_TOKEN}"
 
       - name: Publish the already packed bytes
         env:
