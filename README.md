@@ -5,6 +5,9 @@ games in the arcade cabinet fleet. The package preserves RPGJS and CanvasEngine
 as the real runtime; it only corrects upstream lifecycle defects that have been
 reproduced in headed browser playthroughs.
 
+GitHub is the primary source and release home. The Arcade Cabinet Gitea copy is
+the synchronized LAN backup and private npm registry.
+
 ## Included patches
 
 - Correct all-direction camera clamping when CanvasEngine receives
@@ -22,14 +25,20 @@ sprite and viewport lifecycle guards were added after Quest for the Crown
 reproduced subscription and late-animation failures during rapid authored map
 replacement.
 
-CanvasEngine 2.1.1 now implements the correct Pixi 8 viewport-mask API itself
-and safely skips its own hitbox-anchor work after Pixi destroys a sprite. The
-0.2 line removes those two obsolete patches instead of continuing to override
-fixed upstream behavior.
+CanvasEngine 2.2.0 implements the correct Pixi 8 viewport-mask API itself and
+safely skips its own hitbox-anchor work after Pixi destroys a sprite. This
+package does not override those fixed upstream behaviors.
 
-## CanvasEngine 2.1.1 audit
+## CanvasEngine 2.2.0 audit
 
-| Behavior | 2.1.1 evidence | Decision |
+The official `canvasengine@2.2.0` tag resolves to upstream commit `be33aac`.
+The `packages/core/src` tree is byte-identical to the prior 2.1.1 release at
+`9902a33`; 2.2.0's functional changes are in the coordinated compiler package.
+The packed-consumer proof still reproduces each retained defect against the
+published npm tarball before installation and verifies the repaired behavior
+after installation.
+
+| Behavior | 2.2.0 evidence | Decision |
 | --- | --- | --- |
 | Viewport mask | `CanvasViewport.updateMask()` calls Pixi 8 `clear().rect().fill()` and the packed probe observes that call chain. | Remove patch. |
 | Destroyed hitbox anchor | `CanvasSprite.applyHitboxAnchor()` returns when Pixi has cleared `anchor`; the packed probe destroys a real sprite and calls it safely. | Remove patch. |
@@ -44,7 +53,7 @@ fixed upstream behavior.
 Install the package beside the exact supported CanvasEngine release:
 
 ```sh
-pnpm add @arcade-cabinet/rpgjs-patches@0.2.0 canvasengine@2.1.1
+pnpm add @arcade-cabinet/rpgjs-patches@0.3.0 canvasengine@2.2.0
 ```
 
 Install the patches before CanvasEngine bootstraps a scene:
@@ -64,24 +73,24 @@ Node-based package tooling.
 
 ## Support boundary
 
-This release supports exactly `canvasengine@2.1.1`. The 0.2 version boundary is
-intentional: it removes obsolete public patch functions and does not claim
-compatibility with the older 2.0 runtime. A private package is not
-feature-complete while its direct underlying runtime is behind latest. Audit
-the published upstream source and behavior again before widening the peer range
-or aligning to a newer CanvasEngine.
+This release supports exactly `canvasengine@2.2.0`. The exact peer is
+intentional: compatibility patches are claims about observed upstream behavior,
+not broad semver guesses. Audit the published upstream source and behavior
+again before widening the peer range or aligning to a newer CanvasEngine.
 
 ## Verification
 
-Use Node 24 LTS and the repository-pinned pnpm release:
+Use Node 24.19.0 LTS and the repository-pinned pnpm 11.21.0 release:
 
 ```sh
 pnpm install --frozen-lockfile
 pnpm verify
 ```
 
-`pnpm verify` runs strict type checking, focused lifecycle tests, ESM and CJS
-builds, then packs the artifact into a fresh temporary consumer beside the
-exact CanvasEngine peer. That consumer proves the two upstream fixes, reproduces
-the five defects that remain before patch installation, and proves the packed
-ESM patch entry repairs the real deduplicated CanvasEngine constructors.
+`pnpm verify` runs zero-warning linting, strict type checking, focused lifecycle
+tests, ESM and CJS builds, then packs the artifact into a fresh temporary
+consumer beside the exact CanvasEngine peer. That consumer proves the two
+upstream fixes, reproduces the five defects that remain before patch
+installation, and proves the packed ESM and CJS entries idempotently repair the
+real deduplicated CanvasEngine constructors through the same public-factory
+injection used by RPGJS Solo.

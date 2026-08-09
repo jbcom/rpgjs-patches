@@ -14,7 +14,7 @@ export function normalizeViewportClamp(props: ViewportSettings): ViewportSetting
   if (clampValue !== true) return props;
 
   // pixi-viewport treats omitted/false individual bounds as the numeric value
-  // zero. CanvasEngine 2.1.1 forwards boolean true directly, which therefore
+  // zero. CanvasEngine 2.2.0 forwards boolean true directly, which therefore
   // pushes a centered camera to screenHeight instead of clamping it to the
   // world. The supported pixi-viewport representation is direction: all.
   return { ...props, clamp: { direction: 'all' } };

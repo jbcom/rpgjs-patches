@@ -50,7 +50,7 @@ export function patchSpriteAnimationLifecycleConstructor(
 }
 
 /**
- * CanvasEngine 2.1.1 assigns subscriptionTick inside async onMount(), but a
+ * CanvasEngine 2.2.0 assigns subscriptionTick inside async onMount(), but a
  * fast map replacement can destroy a Sprite before onMount reaches that line.
  * Its onDestroy() then unconditionally calls subscriptionTick.unsubscribe().
  */

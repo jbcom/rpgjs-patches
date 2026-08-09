@@ -8,6 +8,14 @@ const repositoryPackage = JSON.parse(
   await readFile(new URL('../package.json', import.meta.url), 'utf8'),
 );
 const packageManager = repositoryPackage.packageManager;
+const supportedCanvasEngineVersion = repositoryPackage.peerDependencies?.canvasengine;
+
+if (
+  typeof supportedCanvasEngineVersion !== 'string' ||
+  !/^\d+\.\d+\.\d+$/.test(supportedCanvasEngineVersion)
+) {
+  throw new Error('CanvasEngine smoke proof requires one exact peer version');
+}
 
 try {
   execFileSync('corepack', [packageManager, 'pack', '--pack-destination', consumerDir], {
@@ -28,7 +36,7 @@ try {
         type: 'module',
         dependencies: {
           '@arcade-cabinet/rpgjs-patches': `file:${tarballPath}`,
-          canvasengine: '2.1.1',
+          canvasengine: supportedCanvasEngineVersion,
           'pixi.js': '8.19.0',
         },
       },
@@ -36,12 +44,19 @@ try {
       2,
     )}\n`,
   );
-  await writeFile(join(consumerDir, 'verify.mjs'), packedConsumerProof());
+  await writeFile(
+    join(consumerDir, 'verify.mjs'),
+    packedConsumerProof(repositoryPackage.version, supportedCanvasEngineVersion),
+  );
 
-  execFileSync('corepack', [packageManager, 'install', '--ignore-scripts'], {
-    cwd: consumerDir,
-    stdio: 'inherit',
-  });
+  execFileSync(
+    'corepack',
+    [packageManager, 'install', '--ignore-scripts', '--ignore-workspace'],
+    {
+      cwd: consumerDir,
+      stdio: 'inherit',
+    },
+  );
   execFileSync(process.execPath, ['verify.mjs'], {
     cwd: consumerDir,
     stdio: 'inherit',
@@ -50,7 +65,7 @@ try {
   await rm(consumerDir, { recursive: true, force: true });
 }
 
-function packedConsumerProof() {
+function packedConsumerProof(packageVersion, canvasEngineVersion) {
   return String.raw`
 import assert from 'node:assert/strict';
 import { createRequire } from 'node:module';
@@ -85,7 +100,8 @@ const require = createRequire(import.meta.url);
 const cjs = require('@arcade-cabinet/rpgjs-patches');
 const packageJson = require('@arcade-cabinet/rpgjs-patches/package.json');
 
-assert.equal(packageJson.version, '0.2.0');
+assert.equal(packageJson.version, '${packageVersion}');
+assert.equal(packageJson.peerDependencies.canvasengine, '${canvasEngineVersion}');
 for (const entry of [esm, cjs]) {
   assert.equal(typeof entry.installCanvasEnginePatches, 'function');
   assert.equal(typeof entry.patchSpriteAnimationLifecycleConstructor, 'function');
@@ -103,7 +119,7 @@ const canvasEngine = await import('canvasengine');
 console.warn = originalWarn;
 const { Texture } = await import('pixi.js');
 const canvasEnginePackage = require('canvasengine/package.json');
-assert.equal(canvasEnginePackage.version, '2.1.1');
+assert.equal(canvasEnginePackage.version, '${canvasEngineVersion}');
 
 const spriteClass = canvasEngine.Sprite({}).componentInstance.constructor;
 const viewportClass = canvasEngine.Viewport({}).componentInstance.constructor;
@@ -145,7 +161,7 @@ async function captureUnhandled(run, waitMs = 25) {
   return result.reason;
 }
 
-// CanvasEngine 2.1.1 fixed the Pixi 8 mask path itself.
+// CanvasEngine ${canvasEngineVersion} retains the fixed Pixi 8 mask path.
 {
   const instance = new viewportClass();
   const mask = instance.mask;
@@ -172,7 +188,7 @@ async function captureUnhandled(run, waitMs = 25) {
   ]);
 }
 
-// CanvasEngine 2.1.1 also safely ignores its own hitbox-anchor work after
+// CanvasEngine ${canvasEngineVersion} safely ignores its own hitbox-anchor work after
 // Pixi has destroyed the anchor point.
 {
   const instance = new spriteClass();
@@ -181,7 +197,7 @@ async function captureUnhandled(run, waitMs = 25) {
   assert.doesNotThrow(() => instance.applyHitboxAnchor(32, 32));
 }
 
-// The retained patches must still have an observable 2.1.1 defect before
+// The retained patches must still have an observable ${canvasEngineVersion} defect before
 // installation.
 {
   const instance = new viewportClass();
@@ -222,7 +238,19 @@ async function captureUnhandled(run, waitMs = 25) {
 
 esm.installCanvasEnginePatches(canvasEngine, { deferredAssetCleanupMs: 5 });
 
-// The packed ESM entry patches the real, deduplicated CanvasEngine 2.1.1
+// A consumer can safely inject either package entry more than once before
+// creating a scene. This mirrors the RPGJS Solo renderer's constructor hook.
+const installedSpritePlay = spriteClass.prototype.play;
+const installedSpriteDestroy = spriteClass.prototype.onDestroy;
+const installedViewportSettings = viewportClass.prototype.updateViewportSettings;
+const installedViewportDestroy = viewportClass.prototype.onDestroy;
+cjs.installCanvasEnginePatches(canvasEngine, { deferredAssetCleanupMs: 5 });
+assert.equal(spriteClass.prototype.play, installedSpritePlay);
+assert.equal(spriteClass.prototype.onDestroy, installedSpriteDestroy);
+assert.equal(viewportClass.prototype.updateViewportSettings, installedViewportSettings);
+assert.equal(viewportClass.prototype.onDestroy, installedViewportDestroy);
+
+// The packed ESM entry patches the real, deduplicated CanvasEngine ${canvasEngineVersion}
 // constructors used by the isolated consumer.
 {
   const instance = new viewportClass();
@@ -264,6 +292,6 @@ esm.installCanvasEnginePatches(canvasEngine, { deferredAssetCleanupMs: 5 });
   assert.deepEqual(removed, ['late-sheet']);
 }
 
-console.log('Packed CanvasEngine 2.1.1 consumer proof passed');
+console.log('Packed CanvasEngine ${canvasEngineVersion} consumer proof passed');
 `;
 }

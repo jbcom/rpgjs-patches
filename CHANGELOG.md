@@ -1,5 +1,18 @@
 # Changelog
 
+## 0.3.0
+
+- Conform the exact peer, development runtime, and packed-consumer proof to
+  `canvasengine@2.2.0` under Node 24.19.0 and pnpm 11.21.0.
+- Re-audit the published 2.2.0 package against its official source tag. The
+  CanvasEngine runtime source is byte-identical to 2.1.1, so the five retained
+  clamp and lifecycle defects remain reproducible and patched.
+- Prove both ESM and CommonJS entry points, exact peer metadata, cross-entry
+  idempotence, and the RPGJS Solo-style public-factory injection contract in a
+  freshly packed isolated consumer.
+- Add an explicit zero-warning lint gate and align esbuild to its current
+  release.
+
 ## 0.2.0
 
 - Align the exact peer and development runtime to `canvasengine@2.1.1` under

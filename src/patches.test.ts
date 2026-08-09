@@ -162,6 +162,15 @@ describe('CanvasEngine patch installer', () => {
       Viewport: () => ({ componentInstance: new FakeViewport() }),
     });
 
+    const installedSpriteDestroy = spriteClass.prototype.onDestroy;
+    const installedViewportDestroy = FakeViewport.prototype.onDestroy;
+    installCanvasEnginePatches({
+      Sprite: () => ({ componentInstance: new (spriteClass as unknown as new () => object)() }),
+      Viewport: () => ({ componentInstance: new FakeViewport() }),
+    });
+    expect(spriteClass.prototype.onDestroy).toBe(installedSpriteDestroy);
+    expect(FakeViewport.prototype.onDestroy).toBe(installedViewportDestroy);
+
     const sprite = new (spriteClass as unknown as new () => {
       onDestroy: (parent: unknown, callback: () => void) => Promise<void>;
     })();
@@ -171,5 +180,24 @@ describe('CanvasEngine patch installer', () => {
       tickSubscription?: { unsubscribe: () => void };
     };
     await expect(viewport.onDestroy(null, () => undefined)).resolves.toBeUndefined();
+  });
+
+  it('fails closed before patching when a public factory cannot resolve a component class', () => {
+    const spriteClass = createSpriteConstructor();
+
+    expect(() =>
+      installCanvasEnginePatches({
+        Sprite: () => ({ componentInstance: {} }),
+        Viewport: () => ({ componentInstance: {} }),
+      }),
+    ).toThrow('CanvasEngine Sprite component class could not be resolved');
+
+    expect(() =>
+      installCanvasEnginePatches({
+        Sprite: () => ({ componentInstance: new (spriteClass as unknown as new () => object)() }),
+        Viewport: () => ({ componentInstance: {} }),
+      }),
+    ).toThrow('CanvasEngine Viewport component class could not be resolved');
+    expect(spriteClass.__arcadeAnimationLifecyclePatchInstalled).not.toBe(true);
   });
 });
