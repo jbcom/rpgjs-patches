@@ -60,7 +60,7 @@ jobs:
           test "$(git rev-parse HEAD)" = "${EXPECTED_COMMIT}"
           remote_name="$(git remote | head -n 1)"
           test -n "${remote_name}"
-          git fetch "${remote_name}" main --depth=1
+          git fetch "${remote_name}" main --no-tags
           git merge-base --is-ancestor "${EXPECTED_COMMIT}" "${remote_name}/main"
           package_version="$(node -p "require('./package.json').version")"
           test "v${package_version}" = "${RELEASE_TAG}"
