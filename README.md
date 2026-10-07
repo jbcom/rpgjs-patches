@@ -87,11 +87,12 @@ audit, the evidence, and why the two sprite patches must stay off on 2.4.
 
 ## Upstream issues
 
-The surviving defects are reported to CanvasEngine. The package retires once they are fixed.
+The surviving defects have local issue drafts ready for CanvasEngine. Public issue links will
+replace these drafts after filing. The package retires once the defects are fixed.
 
-- Viewport `clamp: true`: _link added once filed_
-- `Viewport.onDestroy()` before `onMount()`: _link added once filed_
-- `Sprite.onDestroy()` before `onMount()`: _link added once filed_
+- Viewport `clamp: true`: [issue draft](./docs/upstream/clamp.md)
+- `Viewport.onDestroy()` before `onMount()`: [issue draft](./docs/upstream/viewport.md)
+- `Sprite.onDestroy()` before `onMount()`: [issue draft](./docs/upstream/sprite.md)
 
 CanvasEngine 2.4.0 already fixed the other two defects upstream
 ([RSamaium/CanvasEngine#60](https://github.com/RSamaium/CanvasEngine/issues/60)).

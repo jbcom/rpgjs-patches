@@ -61,7 +61,7 @@ reach it.
 
 ## Retirement
 
-Each remaining patch is reported upstream (see the README). When a CanvasEngine release fixes a
+Each remaining patch has an upstream issue draft (see the README). When a CanvasEngine release fixes a
 defect, its test flips from "defect" to "fixed", the patch is dropped from the code, and when none
 remain the package is deprecated on npm with a pointer to the CanvasEngine release that made it
 unnecessary.

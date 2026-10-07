@@ -1,0 +1,16 @@
+# rpgjs-patches
+
+> Narrow runtime repairs for CanvasEngine in RPGJS 5. Consumers inject Sprite and Viewport
+> factories; installation returns a per-patch report. No runtime dependencies. Supports
+> CanvasEngine >=2.2.0 <2.5.0, with upstream-fixed late sprite work skipped on 2.4.
+
+## Documentation
+
+- [Documentation site](https://jonbogaty.com/rpgjs-patches/): introduction, setup, and reference.
+- [README](https://github.com/jbcom/rpgjs-patches/blob/main/README.md): installation and quick start.
+- [API](https://github.com/jbcom/rpgjs-patches/blob/main/docs/API.md): exports and installation reports.
+- [Architecture](https://github.com/jbcom/rpgjs-patches/blob/main/docs/ARCHITECTURE.md): runtime invariants.
+- [Compatibility](https://github.com/jbcom/rpgjs-patches/blob/main/docs/COMPATIBILITY.md): real-release audit and retirement rules.
+- [Decisions](https://github.com/jbcom/rpgjs-patches/blob/main/docs/decisions.md): audit and package choices.
+- [Agent notes](https://github.com/jbcom/rpgjs-patches/blob/main/AGENTS.md): toolchain and editing constraints.
+- [Contributing](https://github.com/jbcom/rpgjs-patches/blob/main/CONTRIBUTING.md): setup and verification.
