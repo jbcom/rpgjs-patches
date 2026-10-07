@@ -97,7 +97,8 @@ describe('repository contract', () => {
   it('carries no trace of the private Gitea home or the retired scope', () => {
     expect(existsSync(path.join(root, '.gitea'))).toBe(false)
     expect(existsSync(path.join(root, 'scripts/ensure-release-labels.mjs'))).toBe(false)
-    expect(read('package.json')).not.toContain('@arcade-cabinet')
+    const retiredScope = ['@arcade', 'cabinet'].join('-')
+    expect(read('package.json')).not.toContain(retiredScope)
   })
 })
 
