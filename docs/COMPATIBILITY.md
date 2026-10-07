@@ -13,6 +13,12 @@ every defect against the real `Sprite` and `Viewport` classes of each one, twice
 show the defect is still there, and with the patches installed, to show the repair. A repository
 contract test fails if the peer range is wider than the matrix proves.
 
+## Node.js support
+
+Tooling and packed ESM/CJS consumers support Node.js 22, 24 and 26. The package engine range
+is `>=22`; CI selects maintained majors, and Node 26 is only the development default.
+No shipped entry point requires an API introduced later in the Node 22 line.
+
 ## Audit result per patch
 
 Audited against `canvasengine@2.4.0` (the newest release, tagged from upstream `main`) and against

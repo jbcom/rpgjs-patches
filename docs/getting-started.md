@@ -10,7 +10,7 @@ pnpm add rpgjs-patches canvasengine
 ```
 
 `canvasengine` is a peer: your application, or `@rpgjs/client`, installs it, so there is exactly one
-CanvasEngine runtime. Supported releases are `>=2.2.0 <2.5.0`. Use Node.js 24 or newer for tooling.
+CanvasEngine runtime. Supported releases are `>=2.2.0 <2.5.0`. Use Node.js 22, 24 or 26 for tooling.
 The package ships native ESM and CommonJS entry points with format-correct TypeScript declarations.
 
 ## Patch once at startup

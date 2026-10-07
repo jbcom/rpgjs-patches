@@ -28,7 +28,7 @@ Requirements:
 
 - `canvasengine` `>=2.2.0 <2.5.0` as a peer, resolved by your application so there is exactly one
   CanvasEngine runtime
-- Node.js 24 or newer for tooling (CI covers Node 24 and 26 on Linux)
+- Node.js 22, 24 and 26 for tooling (CI covers each maintained line on Linux)
 
 The package has no runtime dependencies and ships native ESM and CommonJS entry points with
 format-correct TypeScript declarations.

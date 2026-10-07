@@ -50,7 +50,24 @@ the package with a pointer to the upstream release.
 ## Toolchain and verification
 
 Build with Node 26, pnpm 12, and TypeScript 7 using bundler resolution. Keep consumer support
-at Node 24 and newer, including Node 24 type definitions. Emit ESM/CJS with format-correct
+at Node.js 22, 24 and 26 (`engines.node: >=22`), retaining Node 24 type definitions. Emit ESM/CJS with format-correct
 declarations. `pnpm verify` checks lint, docs lint, types, coverage, build, publint, Are The Types
 Wrong, pack contents, and isolated ESM/CJS consumers against every audited release from npmjs.
 Sourcey renders the documentation separately with `pnpm docs:build`.
+
+## 2026-10-07: maintained Node lines
+
+Support Node.js 22 (maintenance LTS), 24 (active LTS), and 26 (current). The engine range
+is a lower bound, not an assertion that end-of-life intermediate lines are maintained.
+Node 26 is the development default, not an exact-version requirement. CI selects each major
+independently. Verify all package gates and isolated packed ESM/CJS consumers on Node 22 and 26
+before lowering the floor; no shipped entry point needs a later Node 22 API.
+
+## 2026-10-07: CI aggregation and branch rules
+
+`CI / gate` always runs and requires every CI dependency to succeed or be explicitly skipped.
+Failed and cancelled jobs block it, including any failed Node matrix leg.
+`scripts/apply-branch-ruleset.mjs` is the canonical OSS ruleset script with repository and check
+defaults for this package. It protects main, Conventional Commits, and release tags; it adds no
+Copilot review or Code Quality rule. Its formatting is retained to simplify comparison with the
+canonical script. Applying it is an explicit administrator operation, separate from verification.
