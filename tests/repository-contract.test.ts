@@ -37,12 +37,18 @@ describe('repository contract', () => {
     ])
   })
 
-  it('builds on Node 26, pnpm 12 and TypeScript 7, and runs on Node 24 and later', () => {
+  it('defaults to Node 26, pnpm 12 and TypeScript 7, and supports maintained Node lines', () => {
     expect(read('.nvmrc').trim()).toBe('26')
     expect(read('mise.toml')).toMatch(/node = "26"[\s\S]*pnpm = "12"/)
     expect(manifest.packageManager).toMatch(/^pnpm@12\.\d+\.\d+$/)
     expect(manifest.devDependencies.typescript).toMatch(/^\^?7\./)
-    expect(manifest.engines).toEqual({ node: '>=24' })
+    expect(manifest.engines).toEqual({ node: '>=22' })
+    const ci = read('.github/workflows/ci.yml')
+    for (const major of ['22', '24', '26']) {
+      expect(ci).toContain(`node: "${major}"`)
+    }
+    // biome-ignore lint/suspicious/noTemplateCurlyInString: GitHub expression, not JavaScript.
+    expect(ci).toContain('node-version: ${{ matrix.node }}')
     expect(manifest.devDependencies['@types/node']).toMatch(/^\^?24\./)
   })
 

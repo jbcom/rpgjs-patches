@@ -3,7 +3,7 @@
 ## Toolchain
 
 - Use Node 26, pnpm 12 (pinned in `package.json`), and TypeScript 7. `mise.toml` and
-  `.nvmrc` describe the development toolchain; consumers support Node 24 and newer.
+  `.nvmrc` describe the development default; Node.js 22, 24 and 26 are supported.
 - The pnpm workspace contains the library at `.` and the private Sourcey site at `docs/`.
   Root `llms.txt` orients repository readers; Sourcey generates the site's version.
 - `pnpm verify` runs Biome, Markdown linting, strict TypeScript, coverage, the dual-format
