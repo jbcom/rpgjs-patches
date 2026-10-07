@@ -17,6 +17,12 @@
       "trailingCommas": "all"
     }
   },
+  "overrides": [
+    {
+      "includes": ["scripts/apply-branch-ruleset.mjs"],
+      "formatter": { "enabled": false }
+    }
+  ],
   "linter": {
     "enabled": true,
     "rules": {

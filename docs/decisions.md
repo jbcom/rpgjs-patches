@@ -62,3 +62,12 @@ is a lower bound, not an assertion that end-of-life intermediate lines are maint
 Node 26 is the development default, not an exact-version requirement. CI selects each major
 independently. Verify all package gates and isolated packed ESM/CJS consumers on Node 22 and 26
 before lowering the floor; no shipped entry point needs a later Node 22 API.
+
+## 2026-10-07: CI aggregation and branch rules
+
+`CI / gate` always runs and requires every CI dependency to succeed or be explicitly skipped.
+Failed and cancelled jobs block it, including any failed Node matrix leg.
+`scripts/apply-branch-ruleset.mjs` is the canonical OSS ruleset script with repository and check
+defaults for this package. It protects main, Conventional Commits, and release tags; it adds no
+Copilot review or Code Quality rule. Its formatting is retained to simplify comparison with the
+canonical script. Applying it is an explicit administrator operation, separate from verification.
