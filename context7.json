@@ -1,0 +1,15 @@
+{
+  "$schema": "https://context7.com/schema/context7.json",
+  "projectTitle": "rpgjs-patches",
+  "description": "Narrow runtime patches for the CanvasEngine defects every RPGJS 5 game meets: the viewport clamp, teardown before mount, and late sprite work.",
+  "branch": "main",
+  "folders": ["docs", "src"],
+  "excludeFolders": ["node_modules", "dist", "coverage", "docs/dist", "docs/node_modules"],
+  "excludeFiles": ["CHANGELOG.md"],
+  "rules": [
+    "Call installCanvasEnginePatches({ Sprite, Viewport }) once, before CanvasEngine mounts a scene.",
+    "Pass the Sprite and Viewport factories in; the package never imports canvasengine.",
+    "A patch is kept only while a test against the real CanvasEngine class reproduces its defect.",
+    "The returned report says which patches the installed release no longer needs."
+  ]
+}

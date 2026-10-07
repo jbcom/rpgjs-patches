@@ -1,0 +1,26 @@
+name: Feature request
+description: Propose a patch for a CanvasEngine defect, or support for a newer CanvasEngine release.
+title: "feat: "
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem
+      description: Which CanvasEngine behavior breaks an RPGJS game, on which release, and how can it be reproduced against the real class?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed patch or behavior
+      description: Say what the patch would wrap and what it would do. Link the upstream issue if there is one.
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives considered
+      description: Describe current workarounds, and whether the fix belongs upstream instead.
+    validations:
+      required: true
