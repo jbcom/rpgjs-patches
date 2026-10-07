@@ -1,5 +1,13 @@
 # Changelog
 
+## [0.4.1](https://github.com/jbcom/rpgjs-patches/compare/v0.4.0...v0.4.1) (2026-10-07)
+
+
+### Bug Fixes
+
+* support every maintained Node line (22, 24 and 26) ([3327f8c](https://github.com/jbcom/rpgjs-patches/commit/3327f8c1e63c4fa75ef1d952f70bca85a5647847))
+* support maintained Node lines and conform OSS CI rules ([277e931](https://github.com/jbcom/rpgjs-patches/commit/277e931a518300e337bf95d0275aa1a9ef267b25))
+
 ## [0.4.0](https://github.com/jbcom/rpgjs-patches/compare/v0.3.0...v0.4.0) - 2026-10-07
 
 - Support CanvasEngine `>=2.2.0 <2.5.0`, with a real-release test matrix for 2.2.0,
