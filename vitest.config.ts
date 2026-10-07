@@ -1,11 +1,15 @@
-import { defineConfig } from 'vitest/config';
+import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
+    include: ['tests/**/*.test.ts'],
     environment: 'node',
+    setupFiles: ['tests/support/dom-stub.ts'],
     coverage: {
       provider: 'v8',
-      reporter: ['text', 'json-summary'],
+      reporter: ['text', 'json', 'html', 'lcov'],
+      include: ['src/**/*.ts'],
+      exclude: ['src/**/*.d.ts'],
     },
   },
-});
+})

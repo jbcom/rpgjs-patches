@@ -1,63 +1,111 @@
 {
-  "name": "@arcade-cabinet/rpgjs-patches",
-  "version": "0.3.0",
-  "description": "Reusable CanvasEngine compatibility patches for standalone RPGJS games.",
+  "name": "rpgjs-patches",
+  "version": "0.4.0",
+  "description": "Narrow runtime patches for the CanvasEngine defects every RPGJS 5 game meets: the viewport clamp, teardown before mount, and late sprite work.",
   "type": "module",
-  "license": "UNLICENSED",
-  "private": false,
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/jbcom/rpgjs-patches.git"
-  },
-  "bugs": {
-    "url": "https://github.com/jbcom/rpgjs-patches/issues"
-  },
-  "engines": {
-    "node": ">=24 <25"
-  },
-  "packageManager": "pnpm@11.21.0",
+  "license": "MIT",
+  "author": "Jon Bogaty <jon@jonbogaty.com>",
   "publishConfig": {
-    "access": "restricted",
-    "registry": "https://registry.npmjs.org/"
+    "access": "public",
+    "provenance": true
   },
-  "files": [
-    "dist",
-    "CHANGELOG.md",
-    "README.md"
-  ],
-  "main": "./dist/cjs/index.js",
+  "sideEffects": false,
+  "main": "./dist/cjs/index.cjs",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/esm/index.d.ts",
-      "import": "./dist/esm/index.js",
-      "require": "./dist/cjs/index.js"
+      "import": {
+        "types": "./dist/esm/index.d.ts",
+        "default": "./dist/esm/index.js"
+      },
+      "require": {
+        "types": "./dist/cjs/index.d.cts",
+        "default": "./dist/cjs/index.cjs"
+      }
     },
     "./package.json": "./package.json"
   },
-  "sideEffects": false,
+  "files": [
+    "CHANGELOG.md",
+    "CONTRIBUTING.md",
+    "SECURITY.md",
+    "dist",
+    "docs/API.md",
+    "docs/ARCHITECTURE.md",
+    "docs/COMPATIBILITY.md"
+  ],
   "scripts": {
-    "clean": "node scripts/clean.mjs",
-    "build": "pnpm run clean && pnpm run build:esm && pnpm run build:cjs && node scripts/postbuild.mjs",
-    "build:esm": "tsc -p tsconfig.json",
-    "build:cjs": "node scripts/build-cjs.mjs",
-    "lint": "oxlint src scripts --max-warnings=0",
-    "typecheck": "tsc -p tsconfig.json --noEmit",
+    "build": "node scripts/build.mjs",
+    "clean": "node -e \"require('node:fs').rmSync('dist', { recursive: true, force: true })\"",
+    "prepack": "node scripts/build.mjs",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "test": "vitest run",
-    "test:coverage": "vitest run --coverage",
-    "verify": "pnpm run lint && pnpm run typecheck && pnpm run test && pnpm run build && node scripts/smoke-package.mjs"
+    "test:watch": "vitest",
+    "coverage": "vitest run --coverage",
+    "lint": "biome check .",
+    "lint:fix": "biome check --write .",
+    "lint:docs": "markdownlint-cli2 README.md CONTRIBUTING.md SECURITY.md CODE_OF_CONDUCT.md CHANGELOG.md AGENTS.md \"docs/**/*.md\" \"!docs/node_modules/**\" \"!docs/dist/**\" .github/PULL_REQUEST_TEMPLATE.md",
+    "package:check": "publint && attw --pack . && node scripts/verify-package.mjs",
+    "smoke:consumer": "node scripts/consumer-smoke.mjs",
+    "verify": "pnpm run lint && pnpm run lint:docs && pnpm run typecheck && pnpm run coverage && pnpm run build && pnpm run package:check && pnpm run smoke:consumer",
+    "docs:dev": "pnpm --filter rpgjs-patches-docs dev",
+    "docs:build": "pnpm --filter rpgjs-patches-docs build",
+    "docs:check": "pnpm --filter rpgjs-patches-docs check",
+    "prepare": "simple-git-hooks"
   },
   "peerDependencies": {
-    "canvasengine": "2.2.0"
+    "canvasengine": ">=2.2.0 <2.5.0"
   },
   "devDependencies": {
-    "@types/node": "24.13.3",
-    "canvasengine": "2.2.0",
-    "esbuild": "0.28.2",
-    "oxlint": "1.77.0",
-    "pixi.js": "8.19.0",
-    "typescript": "7.0.2",
-    "vitest": "4.1.10"
-  }
+    "@arethetypeswrong/cli": "^0.18.5",
+    "@biomejs/biome": "2.5.15",
+    "@commitlint/cli": "^21.2.3",
+    "@commitlint/config-conventional": "^21.2.3",
+    "@types/node": "^24.13.3",
+    "@vitest/coverage-v8": "^5.0.3",
+    "canvasengine-2.2.0": "npm:canvasengine@2.2.0",
+    "canvasengine-2.3.0": "npm:canvasengine@2.3.0",
+    "canvasengine-2.4.0": "npm:canvasengine@2.4.0",
+    "lint-staged": "^17.6.0",
+    "markdownlint-cli2": "^0.23.3",
+    "pixi.js": "^8.19.0",
+    "publint": "^0.3.25",
+    "simple-git-hooks": "^2.14.0",
+    "typescript": "^7.0.2",
+    "vitest": "^5.0.3"
+  },
+  "simple-git-hooks": {
+    "pre-commit": "pnpm exec lint-staged",
+    "commit-msg": "pnpm exec commitlint --edit $1"
+  },
+  "lint-staged": {
+    "*.{ts,js,mjs,cjs,json}": [
+      "biome check --write --no-errors-on-unmatched"
+    ],
+    "*.md": [
+      "markdownlint-cli2"
+    ]
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jbcom/rpgjs-patches.git"
+  },
+  "packageManager": "pnpm@12.10.1",
+  "bugs": {
+    "url": "https://github.com/jbcom/rpgjs-patches/issues"
+  },
+  "homepage": "https://github.com/jbcom/rpgjs-patches#readme",
+  "engines": {
+    "node": ">=24"
+  },
+  "keywords": [
+    "rpgjs",
+    "canvasengine",
+    "pixi",
+    "pixi-viewport",
+    "patch",
+    "workaround",
+    "game-dev"
+  ]
 }
