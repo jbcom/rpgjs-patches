@@ -1,6 +1,7 @@
 // The package's own repository is its only home: these assertions keep the manifest, the toolchain,
 // the publish path and the compatibility claims pointing at it, so a copy-paste from another
 // repository, or a peer range wider than the tests prove, cannot drift in.
+import { spawnSync } from 'node:child_process'
 import { existsSync, readFileSync } from 'node:fs'
 import path from 'node:path'
 import { describe, expect, it } from 'vitest'
@@ -78,6 +79,34 @@ describe('repository contract', () => {
       'publint && attw --pack . && node scripts/verify-package.mjs',
     )
     expect(read('.github/workflows/ci.yml')).toContain('run: pnpm verify')
+  })
+
+  it('always aggregates every CI job and rejects failed or cancelled dependencies', () => {
+    const ci = read('.github/workflows/ci.yml')
+    const jobs = [...(ci.split('\njobs:\n')[1] ?? '').matchAll(/^ {2}([\w-]+):$/gm)].map(
+      (match) => match[1],
+    )
+    const gate = ci.split('\n  gate:')[1] ?? ''
+    expect(gate).toContain('if: always()')
+    const needs = /needs: \[([^\]]+)\]/
+      .exec(gate)?.[1]
+      ?.split(',')
+      .map((job) => job.trim())
+    expect(needs?.sort()).toEqual(jobs.filter((job) => job !== 'gate').sort())
+    const variables = [...gate.matchAll(/^ {10}([A-Z_]+_RESULT):/gm)].map((match) => match[1])
+    expect(variables).toHaveLength(needs?.length ?? 0)
+    const shell = gate.split('run: |\n')[1] ?? ''
+    expect(shell).not.toBe('')
+    for (const variable of variables) {
+      for (const result of ['success', 'skipped', 'failure', 'cancelled']) {
+        const env = Object.fromEntries(variables.map((name) => [name, 'success']))
+        env[variable ?? ''] = result
+        const run = spawnSync('bash', ['-e', '-c', shell], { env: { ...process.env, ...env } })
+        expect(run.status, `${variable}: ${result}`).toBe(
+          result === 'success' || result === 'skipped' ? 0 : 1,
+        )
+      }
+    }
   })
 
   it('publishes from cd.yml by OIDC after verifying, with no token in the repository', () => {
