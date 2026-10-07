@@ -7,7 +7,10 @@
   "private": false,
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/jbcom/rpgjs-patches.git"
+    "url": "https://github.com/jbcom/rpgjs-patches.git"
+  },
+  "bugs": {
+    "url": "https://github.com/jbcom/rpgjs-patches/issues"
   },
   "engines": {
     "node": ">=24 <25"
